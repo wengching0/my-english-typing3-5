@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>版本四｜十鍵掉落字母</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f5f3ec; color: #243e38; margin: 0; padding: 20px; text-align: center; }
+    main { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #ccd7ce; }
+    .sky { height: 260px; position: relative; background: linear-gradient(#e2edf0, #f5f0df); border-bottom: 6px solid #a5b794; border-radius: 12px; overflow: hidden; margin: 16px 0; }
+    .falling { position: absolute; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: #ab4939; color: #fff; font-size: 28px; font-weight: bold; display: grid; place-items: center; border-radius: 12px; top: 0; }
+    .controls { display: flex; flex-direction: column; gap: 8px; text-align: left; background: #eef0e8; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+    button { padding: 8px 16px; background: #426d5e; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <p><a href="../index.html">← 回開發歷程首頁</a></p>
+    <h1>版本四：十鍵掉落字母</h1>
+    
+    <div class="controls">
+      <label>落地時間：<span id="speedVal">12</span> 秒
+        <input type="range" id="speedSlider" min="3" max="14" value="12">
+      </label>
+      <label><input type="checkbox" id="accelCheck"> 答對3題自動加速 1 秒</label>
+    </div>
+
+    <div>得分：<b id="score">0</b> / 10 題 | 落地失誤：<b id="miss">0</b></div>
+
+    <div class="sky" id="sky">
+      <div class="falling" id="fallingChar" style="display:none;">A</div>
+    </div>
+
+    <button id="startBtn">開始遊戲</button>
+  </main>
+
+  <script>
+    const keys = ['A','S','D','F','G','H','J','K','L',';'];
+    let currentKey = '';
+    let count = 0, score = 0, miss = 0;
+    let isPlaying = false, animId = null, startTime = null;
+    
+    let baseSpeed = 12;
+    let currentSpeed = 12;
+
+    const charEl = document.getElementById('fallingChar');
+    const skyEl = document.getElementById('sky');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+    const accelCheck = document.getElementById('accelCheck');
+
+    speedSlider.addEventListener('input', (e) => {
+      baseSpeed = parseInt(e.target.value);
+      speedVal.textContent = baseSpeed;
+    });
+
+    function spawn() {
+      if (count >= 10) {
+        isPlaying = false;
+        charEl.style.display = 'none';
+        alert(`一回合結束！\n答對得分：${score}\n落地失誤：${miss}`);
+        return;
+      }
+      count++;
+      currentKey = keys[Math.floor(Math.random() * keys.length)];
+      charEl.textContent = currentKey;
+      charEl.style.display = 'grid';
+      
+      if (accelCheck.checked) {
+        currentSpeed = Math.max(3, baseSpeed - Math.floor(score / 3));
+      } else {
+        currentSpeed = baseSpeed;
+      }
+
+      startTime = performance.now();
+      animate();
+    }
+
+    function animate() {
+      if (!isPlaying) return;
+      const now = performance.now();
+      const progress = (now - startTime) / (currentSpeed * 1000);
+      const maxY = skyEl.clientHeight - 56;
+
+      if (progress >= 1) {
+        miss++;
+        document.getElementById('miss').textContent = miss;
+        spawn();
+      } else {
+        charEl.style.top = (progress * maxY) + 'px';
+        animId = requestAnimationFrame(animate);
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      count = 0; score = 0; miss = 0;
+      document.getElementById('score').textContent = 0;
+      document.getElementById('miss').textContent = 0;
+      isPlaying = true;
+      spawn();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!isPlaying || e.repeat) return;
+      let pressed = e.key.toUpperCase();
+      if (e.key === ';') pressed = ';';
+
+      if (pressed === currentKey) {
+        cancelAnimationFrame(animId);
+        score++;
+        document.getElementById('score').textContent = score;
+        spawn();
+      }
+    });
+  </script>
+</body>
+</html>

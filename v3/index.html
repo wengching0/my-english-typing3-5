@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>版本三｜ASDF 練習</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f5f3ec; color: #243e38; margin: 0; padding: 24px; text-align: center; }
+    main { max-width: 700px; margin: auto; background: #fff; padding: 24px; border-radius: 16px; border: 1px solid #ccd7ce; }
+    .target { font-size: 72px; font-weight: bold; color: #ab4939; margin: 16px 0; }
+    .keyboard { display: flex; justify-content: center; gap: 8px; margin: 20px 0; }
+    .key { width: 50px; height: 50px; border: 1px solid #8a9f90; border-radius: 8px; display: grid; place-items: center; font-size: 20px; font-weight: bold; background: #f9faf4; }
+    .key.active { background: #ab4939; color: #fff; border-color: #682a28; }
+    button { padding: 10px 20px; background: #426d5e; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 4px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p><a href="../index.html">← 回開發歷程首頁</a></p>
+    <h1>版本三：ASDF 打字練習</h1>
+    <div>得分：<b id="score">0</b></div>
+    <div class="target" id="targetChar">-</div>
+    
+    <div class="keyboard">
+      <div class="key" id="key-A">A</div>
+      <div class="key" id="key-S">S</div>
+      <div class="key" id="key-D">D</div>
+      <div class="key" id="key-F">F</div>
+    </div>
+
+    <button id="startBtn">開始 / 重新開始</button>
+    <button id="stopBtn">停止</button>
+  </main>
+
+  <script>
+    const keys = ['A', 'S', 'D', 'F'];
+    let currentTarget = '';
+    let score = 0;
+    let isPlaying = false;
+
+    const targetEl = document.getElementById('targetChar');
+    const scoreEl = document.getElementById('score');
+
+    function nextQuestion() {
+      const rand = Math.floor(Math.random() * keys.length);
+      currentTarget = keys[rand];
+      targetEl.textContent = currentTarget;
+      
+      keys.forEach(k => document.getElementById('key-' + k).classList.remove('active'));
+      document.getElementById('key-' + currentTarget).classList.add('active');
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      score = 0;
+      scoreEl.textContent = score;
+      isPlaying = true;
+      nextQuestion();
+    });
+
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      isPlaying = false;
+      targetEl.textContent = '-';
+      keys.forEach(k => document.getElementById('key-' + k).classList.remove('active'));
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!isPlaying || e.repeat) return;
+      const pressed = e.key.toUpperCase();
+      if (pressed === currentTarget) {
+        score++;
+        scoreEl.textContent = score;
+        nextQuestion();
+      }
+    });
+  </script>
+</body>
+</html>
